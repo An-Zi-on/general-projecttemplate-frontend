@@ -41,6 +41,7 @@ const asideWidth = computed(() => (isCollapse.value ? '64px' : '200px'))
 
 .layout-aside {
   position: relative;
+  z-index: 2;
   height: 100%;
   overflow: visible;
   transition: width 0.3s ease;

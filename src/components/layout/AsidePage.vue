@@ -84,7 +84,7 @@ const handleClose = (key: string, keyPath: string[]) => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .collapse-trigger {
