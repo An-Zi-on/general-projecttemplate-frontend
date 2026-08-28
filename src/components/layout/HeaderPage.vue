@@ -1,22 +1,40 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
 
-const circleUrl
+const defaultAvatar
   = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
-const isLoggedIn = ref(false)
-const cardVisible = ref(false)
+const router = useRouter()
+const userStore = useUserStore()
+const { loginUser, isLoggedIn } = storeToRefs(userStore)
 
-const userInfo = {
-  name: '张三',
-  role: '系统管理员',
-  phone: '138****8888',
-  lastLogin: '2026-08-27 09:30',
-}
+const cardVisible = ref(false)
+const loggingOut = ref(false)
+
+const avatarUrl = computed(() => loginUser.value?.userAvatar || defaultAvatar)
 
 const handleLogin = () => {
-  // 后续接入登录逻辑
-  isLoggedIn.value = true
+  router.push('/user/login')
+}
+
+const handleLogout = async () => {
+  loggingOut.value = true
+  try {
+    await userStore.logout()
+    cardVisible.value = false
+    ElMessage.success('已退出登录')
+    router.push('/user/login')
+  }
+  catch {
+    ElMessage.error('退出登录失败')
+  }
+  finally {
+    loggingOut.value = false
+  }
 }
 </script>
 
@@ -38,41 +56,48 @@ const handleLogin = () => {
         <el-avatar
           class="user-avatar"
           :size="40"
-          :src="circleUrl"
+          :src="avatarUrl"
         />
       </template>
 
       <el-card class="user-card" shadow="never">
         <div class="user-card-header">
-          <el-avatar :size="48" :src="circleUrl" />
+          <el-avatar :size="48" :src="avatarUrl" />
           <div class="user-card-title">
             <p class="user-name">
-              {{ userInfo.name }}
+              {{ loginUser?.userName || '未命名用户' }}
             </p>
             <p class="user-role">
-              {{ userInfo.role }}
+              {{ loginUser?.userRole || '普通用户' }}
             </p>
           </div>
         </div>
 
         <ul class="user-info-list">
           <li class="info-item">
-            <span class="info-label">手机号</span>
-            <span class="info-value">{{ userInfo.phone }}</span>
+            <span class="info-label">账号</span>
+            <span class="info-value">{{ loginUser?.userAccount || '-' }}</span>
           </li>
           <li class="info-item">
-            <span class="info-label">上次登录</span>
-            <span class="info-value">{{ userInfo.lastLogin }}</span>
+            <span class="info-label">个人简介</span>
+            <span class="info-value">{{ loginUser?.userProfile || '暂无' }}</span>
           </li>
           <li class="info-item">
-            <span class="info-label">所属校区</span>
-            <span class="info-value">东校区</span>
-          </li>
-          <li class="info-item">
-            <span class="info-label">账号状态</span>
-            <span class="info-value status-normal">正常</span>
+            <span class="info-label">上次更新</span>
+            <span class="info-value">{{ loginUser?.updateTime || '-' }}</span>
           </li>
         </ul>
+
+        <el-button
+          class="logout-btn"
+          type="danger"
+          plain
+          size="small"
+          :loading="loggingOut"
+          @click="handleLogout"
+        >
+          退出登录
+        </el-button>
       </el-card>
     </el-popover>
   </div>
@@ -145,7 +170,8 @@ const handleLogin = () => {
   color: var(--el-text-color-primary);
 }
 
-.status-normal {
-  color: var(--el-color-success);
+.logout-btn {
+  width: 100%;
+  margin-top: 10px;
 }
 </style>
