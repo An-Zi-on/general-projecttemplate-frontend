@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { currentUserUsingGet, loginOutUsingGet } from '@/api/userController'
+import { TOKEN_STORAGE_KEY } from '@/globalconfig/auth'
 
 export type LoginUser = {
   id?: number
@@ -16,14 +17,26 @@ export type LoginUser = {
 export const useUserStore = defineStore('user', () => {
   const loginUser = ref<LoginUser | null>(null)
   const loading = ref(false)
-
   const isLoggedIn = computed(() => loginUser.value !== null)
+  const token = ref<string>(localStorage.getItem(TOKEN_STORAGE_KEY) || '')
 
-  function setLoginUser(user: LoginUser | null) {
-    loginUser.value = user
+  function setLoginToken(currentToken: string | null) {
+    const value = currentToken ?? ''
+    token.value = value
+    if (value) {
+      localStorage.setItem(TOKEN_STORAGE_KEY, value)
+    }
+    else {
+      localStorage.removeItem(TOKEN_STORAGE_KEY)
+    }
   }
 
   async function fetchLoginUser() {
+    if (!token.value) {
+      loginUser.value = null
+      return null
+    }
+
     loading.value = true
     try {
       const result = await currentUserUsingGet()
@@ -32,6 +45,7 @@ export const useUserStore = defineStore('user', () => {
         return loginUser.value
       }
       loginUser.value = null
+      setLoginToken(null)
       return null
     }
     catch {
@@ -49,6 +63,7 @@ export const useUserStore = defineStore('user', () => {
     }
     finally {
       loginUser.value = null
+      setLoginToken(null)
     }
   }
 
@@ -56,8 +71,9 @@ export const useUserStore = defineStore('user', () => {
     loginUser,
     loading,
     isLoggedIn,
-    setLoginUser,
+    setLoginToken,
     fetchLoginUser,
     logout,
+    token,
   }
 })

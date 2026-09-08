@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import { userLoginUsingPost } from '@/api/userController'
-import { useUserStore, type LoginUser } from '@/stores/user'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const route = useRoute()
@@ -49,9 +49,14 @@ const handleSubmit = async () => {
         ElMessage.error(result.message || '登录失败')
         return
       }
-
       ElMessage.success('登录成功')
-      userStore.setLoginUser(result.data as LoginUser)
+      const loginToken = typeof result.data === 'string' ? result.data : ''
+      if (!loginToken) {
+        ElMessage.error('登录成功但未返回 token')
+        return
+      }
+      userStore.setLoginToken(loginToken)
+      await userStore.fetchLoginUser()
       const redirect = route.query.redirect as string | undefined
       await router.push(redirect || '/')
     }
