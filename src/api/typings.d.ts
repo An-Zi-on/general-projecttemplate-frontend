@@ -5,6 +5,12 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseString_ = {
+    code?: number;
+    data?: string;
+    message?: string;
+  };
+
   type BaseResponsePageUserVO_ = {
     code?: number;
     data?: PageUserVO_;
@@ -64,6 +70,7 @@ declare namespace API {
 
   type UserVO = {
     createTime?: string;
+    updateTime?: string;
     id?: number;
     userAccount?: string;
     userAvatar?: string;

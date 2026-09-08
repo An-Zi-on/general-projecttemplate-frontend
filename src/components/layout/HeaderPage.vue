@@ -8,6 +8,8 @@ import { useUserStore } from '@/stores/user'
 const defaultAvatar
   = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
+const API_ORIGIN = 'http://localhost:8123'
+
 const router = useRouter()
 const userStore = useUserStore()
 const { loginUser, isLoggedIn } = storeToRefs(userStore)
@@ -15,10 +17,25 @@ const { loginUser, isLoggedIn } = storeToRefs(userStore)
 const cardVisible = ref(false)
 const loggingOut = ref(false)
 
-const avatarUrl = computed(() => loginUser.value?.userAvatar || defaultAvatar)
+const resolveAvatar = (url?: string) => {
+  if (!url) {
+    return defaultAvatar
+  }
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url
+  }
+  return `${API_ORIGIN}${url}`
+}
+
+const avatarUrl = computed(() => resolveAvatar(loginUser.value?.userAvatar))
 
 const handleLogin = () => {
   router.push('/user/login')
+}
+
+const goProfile = () => {
+  cardVisible.value = false
+  router.push('/user/profile')
 }
 
 const handleLogout = async () => {
@@ -40,7 +57,11 @@ const handleLogout = async () => {
 
 <template>
   <div class="header-page">
-    <el-button v-if="!isLoggedIn" type="primary" @click="handleLogin">
+    <el-button
+      v-if="!isLoggedIn"
+      type="primary"
+      @click="handleLogin"
+    >
       登录
     </el-button>
 
@@ -60,9 +81,15 @@ const handleLogout = async () => {
         />
       </template>
 
-      <el-card class="user-card" shadow="never">
+      <el-card
+        class="user-card"
+        shadow="never"
+      >
         <div class="user-card-header">
-          <el-avatar :size="48" :src="avatarUrl" />
+          <el-avatar
+            :size="48"
+            :src="avatarUrl"
+          />
           <div class="user-card-title">
             <p class="user-name">
               {{ loginUser?.userName || '未命名用户' }}
@@ -87,6 +114,16 @@ const handleLogout = async () => {
             <span class="info-value">{{ loginUser?.updateTime || '-' }}</span>
           </li>
         </ul>
+
+        <el-button
+          class="profile-link-btn"
+          type="primary"
+          plain
+          size="small"
+          @click="goProfile"
+        >
+          个人中心
+        </el-button>
 
         <el-button
           class="logout-btn"
@@ -166,12 +203,22 @@ const handleLogout = async () => {
 }
 
 .info-value {
+  max-width: 150px;
+  overflow: hidden;
   text-align: right;
+  text-overflow: ellipsis;
   color: var(--el-text-color-primary);
+  white-space: nowrap;
+}
+
+.profile-link-btn {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .logout-btn {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 8px;
+  margin-left: 0;
 }
 </style>

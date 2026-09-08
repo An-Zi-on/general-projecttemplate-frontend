@@ -93,6 +93,35 @@ export async function userRegisterUsingPost(
   });
 }
 
+/** updateMyProfile POST /api/user/update/my */
+export async function updateMyProfileUsingPost(
+  body: API.UserUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseObject_>("/api/user/update/my", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** uploadAvatar POST /api/user/upload/avatar */
+export async function uploadAvatarUsingPost(
+  file: File,
+  options?: { [key: string]: any }
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return request<API.BaseResponseString_>("/api/user/upload/avatar", {
+    method: "POST",
+    data: formData,
+    ...(options || {}),
+  });
+}
+
 /** update POST /api/user/update */
 export async function updateUsingPost(
   body: API.UserUpdateRequest,

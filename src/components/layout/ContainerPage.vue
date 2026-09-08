@@ -3,7 +3,6 @@ import { computed, ref } from 'vue'
 import FooterPage from '@/components/layout/FooterPage.vue'
 import HeaderPage from '@/components/layout/HeaderPage.vue'
 import AsidePage from '@/components/layout/AsidePage.vue'
-import MainPage from '@/components/layout/MainPage.vue'
 
 const isCollapse = ref(true)
 const asideWidth = computed(() => (isCollapse.value ? '64px' : '200px'))
@@ -21,7 +20,7 @@ const asideWidth = computed(() => (isCollapse.value ? '64px' : '200px'))
           <HeaderPage />
         </el-header>
         <el-main class="layout-main">
-          <MainPage />
+          <router-view />
         </el-main>
         <el-footer class="layout-footer">
           <FooterPage />
